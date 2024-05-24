@@ -1,1 +1,0 @@
-rm -f test_mobile.css test_tablet.css test.css test_tv.css && python3 html2css.py test.html --mobile --tablet --tv https://raw.githubusercontent.com/playsetco/template/main/styles.css
