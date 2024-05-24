@@ -49,8 +49,6 @@ Test with:
 # Install/enable run & test scripts ONE TIME:
 ```
 chmod +x test.sh
-```
-```
 chmod +x run.sh
 ```
 
