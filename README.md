@@ -38,6 +38,9 @@ Add default styles:
 --defaultstyle
 ```
 
+#### Default Styles
+https://raw.githubusercontent.com/playsetco/template/main/styles.css
+
 ## Testing
 Use test HTML to test code which will print the output.
 
