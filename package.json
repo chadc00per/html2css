@@ -2,6 +2,8 @@
   "name": "html2css-parser",
   "version": "1.0.0",
   "main": "html2css.py",
+  "author": "Chad Cooper",
+  "company": "Playset Co",
   "scripts": {
     "start": "python3 html2css.py"
   },

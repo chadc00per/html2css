@@ -1,12 +1,12 @@
 # HTML2CSS parser
 This script converts an HTML's tags, classes & ID's into a stylesheet.
 
-## Download script to html folder & run:
+## Run
 ```
 python3 html2css.py path/to/your/file.html --mobile --tablet --tv --defaultstyle
 ```
     
-## Parameters:
+## Parameters
 The script:
 ```
 html2css.py
@@ -46,16 +46,7 @@ Test with:
 ./test.sh
 ```
 
-# Install/enable run & test scripts ONE TIME:
+### Install/enable run & test scripts ONE TIME:
 ```
 chmod +x test.sh
-chmod +x run.sh
-```
-
-## Run
-Use test HTML to run code which will print the output.
-
-Test with:
-```
-./run.sh
 ```
