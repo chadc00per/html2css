@@ -1,1 +1,0 @@
-python3 html2css.py sample.html --tv --tablet --mobile --defaultstyle

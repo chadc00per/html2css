@@ -31,7 +31,7 @@ def read_css_file(file_path):
         # If the file is not found, return an error message
         return f"File not found: {file_path}. Please check the file path and try again."
 
-def parse_html_to_css(html_content, default_css_content=None):
+def parse_html_to_css(html_content):
     # Regular expressions to find tags, classes, IDs, and pseudo-classes
     tag_pattern = re.compile(r'<(?!head|title|style|div)(\w+)')
     class_pattern = re.compile(r'class="([^"]+)"')
@@ -40,9 +40,6 @@ def parse_html_to_css(html_content, default_css_content=None):
     pseudo_class_pattern = re.compile(r'([.#]?\w+):(\w+)')
 
     css_dict = defaultdict(set)
-
-    # Add :root{} at the very top
-    css_dict[":root"] = set()
 
     # Find all tags
     tags = tag_pattern.findall(html_content)
@@ -65,29 +62,18 @@ def parse_html_to_css(html_content, default_css_content=None):
         tag, style = match.groups()
         css_dict[tag].add(style)
 
-    # Apply default styles if provided, but only to selectors already found in HTML
-    if default_css_content:
+    # Extract styles from linked stylesheets
+    link_pattern = re.compile(r'<link\s+rel="stylesheet"\s+href="([^"]+)"')
+    linked_stylesheets = link_pattern.findall(html_content)
+    for stylesheet in linked_stylesheets:
+        if stylesheet.startswith("http://") or stylesheet.startswith("https://"):
+            css_content = read_html_url(stylesheet)
+        else:
+            css_content = read_css_file(stylesheet)
         default_css_pattern = re.compile(r'([.#]?\w+)\s*{\s*([^}]*)\s*}')
-        root_pattern = re.compile(r':root\s*{\s*([^}]*)\s*}')
-        
-        # Extract and add :root styles
-        root_match = root_pattern.search(default_css_content)
-        if root_match:
-            root_styles = root_match.group(1).strip()
-            css_dict[":root"].add(root_styles)
-        
-        for match in default_css_pattern.finditer(default_css_content):
+        for match in default_css_pattern.finditer(css_content):
             selector, styles = match.groups()
-            if selector in css_dict:
-                css_dict[selector].add(styles.strip())
-            elif selector == ":root":
-                css_dict[":root"].add(styles.strip())
-
-        # Include pseudo-classes if they match existing selectors
-        for match in pseudo_class_pattern.finditer(default_css_content):
-            base_selector, pseudo_class = match.groups()
-            if base_selector in css_dict:
-                css_dict[f"{base_selector}:{pseudo_class}"].update(css_dict[base_selector])
+            css_dict[selector].add(styles.strip())
 
     # Merge styles for the same selector
     css_content = "/*Welcome*/\n"
@@ -111,17 +97,9 @@ if __name__ == "__main__":
     else:
         # Initialize an empty string to hold the combined HTML content
         combined_html_content = ""
-        default_css_content = None
         media_flags = {'--mobile': '(max-width: 480px)', '--tablet': '(min-width: 481px) and (max-width: 767px)', '--tv': '(min-width: 1201px)'}
         active_media_queries = []
 
-        # Check for --defaultstyle flag and read the default CSS file if present
-        if '--defaultstyle' in sys.argv:
-            default_css_path = "default.css"
-            default_css_content = read_css_file(default_css_path)
-            # Remove the flag from the arguments list
-            sys.argv.remove('--defaultstyle')
-        
         # Check for media flags and store them
         for flag in media_flags.keys():
             if flag in sys.argv:
@@ -140,7 +118,7 @@ if __name__ == "__main__":
             combined_html_content += html_content + "\n"
         
         # Parse the combined HTML content to CSS
-        css_content, css_dict = parse_html_to_css(combined_html_content, default_css_content)
+        css_content, css_dict = parse_html_to_css(combined_html_content)
         
         # Print the generated CSS content
         print(css_content)
@@ -149,7 +127,7 @@ if __name__ == "__main__":
         if active_media_queries:
             for media_query in active_media_queries:
                 media_content = f"@media screen and {media_query} {{\n"
-                for selector in sorted(css_dict.keys(), key=lambda x: x.lstrip('.#')):
+                for selector in sorted(css_dict.keys(), key=lambda x: x[0].lstrip('.#')):
                     if selector not in [":root", "html"]:
                         media_content += f"    {selector} {{\n    }}\n"
                 media_content += "}\n"
